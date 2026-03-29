@@ -10,6 +10,7 @@ export default function Signup() {
   const [role, setRole] = useState('patient')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [focused, setFocused] = useState(null)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -17,7 +18,7 @@ export default function Signup() {
     setLoading(true)
     try {
       await signUp({ email, password, fullName, role })
-      navigate('/login')
+      navigate(role === 'doctor' ? '/doctor' : '/patient')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -49,7 +50,7 @@ export default function Signup() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Email</label>
+          <label>Email address</label>
           <input
             type="email"
             value={email}
@@ -73,14 +74,22 @@ export default function Signup() {
 
         <div style={{ marginBottom: '1.5rem' }}>
           <label>I am a</label>
-          <select
-            value={role}
-            onChange={e => setRole(e.target.value)}
-            style={{ display: 'block', width: '100%', marginTop: 4 }}
-          >
-            <option value="patient">Patient</option>
-            <option value="doctor">Doctor</option>
-          </select>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: 4 }}>
+            <button
+              type="button"
+              onClick={() => setRole('patient')}
+              style={{ flex: 1, padding: '0.5rem', fontWeight: role === 'patient' ? 'bold' : 'normal' }}
+            >
+              Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('doctor')}
+              style={{ flex: 1, padding: '0.5rem', fontWeight: role === 'doctor' ? 'bold' : 'normal' }}
+            >
+              Doctor
+            </button>
+          </div>
         </div>
 
         <button type="submit" disabled={loading} style={{ width: '100%' }}>

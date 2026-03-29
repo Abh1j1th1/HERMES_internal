@@ -1,66 +1,67 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { signIn } from '../features/auth/authService'
-import { useAuth } from '../hooks/useAuth.jsx'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
-export default function Login() {
+export default function ResetPassword() {
   const navigate = useNavigate()
-  const { profile } = useAuth()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
+    if (password !== confirm) {
+      setError('Passwords do not match')
+      return
+    }
     setLoading(true)
     try {
-      await signIn({ email, password })
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) throw error
+      navigate('/login')
     } catch (err) {
       setError(err.message)
+    } finally {
       setLoading(false)
     }
   }
 
-  if (profile?.role === 'patient') navigate('/patient')
-  if (profile?.role === 'doctor') navigate('/doctor')
-
   return (
     <div style={{ maxWidth: 400, margin: '80px auto', padding: '0 1rem' }}>
-      <h1 style={{ marginBottom: '0.25rem' }}>Sign in</h1>
+      <h1 style={{ marginBottom: '0.25rem' }}>Reset password</h1>
       <p style={{ marginBottom: '2rem', color: 'gray' }}>
-        Don't have an account? <Link to="/signup">Sign up</Link>
+        Enter your new password below
       </p>
       {error && (
         <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>
       )}
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            style={{ display: 'block', width: '100%', marginTop: 4 }}
-          />
-        </div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label>Password</label>
+          <label>New password</label>
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
+            minLength={6}
             style={{ display: 'block', width: '100%', marginTop: 4 }}
           />
-          <Link to="/forgot-password" style={{ fontSize: '0.85rem', color: 'gray', display: 'block', marginTop: 4 }}>
-            Forgot password?
-          </Link>
+        </div>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label>Confirm password</label>
+          <input
+            type="password"
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            required
+            minLength={6}
+            style={{ display: 'block', width: '100%', marginTop: 4 }}
+          />
         </div>
         <button type="submit" disabled={loading} style={{ width: '100%' }}>
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? 'Updating...' : 'Update password'}
         </button>
       </form>
     </div>

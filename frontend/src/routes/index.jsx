@@ -4,6 +4,8 @@ import { RoleGuard } from './RoleGuard'
 import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Signup from '../pages/Signup'
+import ForgotPassword from '../pages/ForgotPassword'
+import ResetPassword from '../pages/ResetPassword'
 import Unauthorized from '../pages/Unauthorized'
 
 import PatientDashboard from '../pages/patient/Dashboard'
@@ -28,6 +30,8 @@ export const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <Signup /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
   { path: '/unauthorized', element: <Unauthorized /> },
 
   {
