@@ -130,13 +130,6 @@ export default function DoctorPatientDetail() {
                 <p style={{ margin: 0, fontSize: '0.95rem' }}>{profile.email || '—'}</p>
               </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                  Phone
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.95rem' }}>{patient?.phone || '—'}</p>
-              </div>
-
               <div>
                 <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
                   Account Status
@@ -162,16 +155,7 @@ export default function DoctorPatientDetail() {
                   Date of Birth
                 </h3>
                 <p style={{ margin: 0, fontSize: '0.95rem' }}>
-                  {patient?.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString() : '—'}
-                </p>
-              </div>
-
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                  Blood Type
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500 }}>
-                  {patient?.blood_type || '—'}
+                  {patient?.dob ? new Date(patient.dob).toLocaleDateString() : '—'}
                 </p>
               </div>
 
@@ -183,17 +167,6 @@ export default function DoctorPatientDetail() {
                   {records?.length || 0}
                 </p>
               </div>
-
-              {patient?.allergies && (
-                <div>
-                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                    Allergies
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.95rem', color: '#dc2626' }}>
-                    {patient.allergies}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </div>

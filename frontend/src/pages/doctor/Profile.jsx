@@ -13,15 +13,12 @@ export default function DoctorProfile() {
   const [saveLoading, setSaveLoading] = useState(false)
   const [saveError, setSaveError] = useState(null)
 
-  // Form state
+  // Form state - Cleaned up to exactly match DB schema
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     specialization: '',
     licenseNo: '',
-    phone: '',
-    bio: '',
-    yearsExperience: '',
   })
 
   // Fetch both profiles and doctors rows for current user
@@ -47,21 +44,17 @@ export default function DoctorProfile() {
 
       if (doctorError && doctorError.code !== 'PGRST116') throw doctorError
 
-      // Combine data
       const combined = {
         profile: profileRow || {},
         doctor: doctorRow || {},
       }
 
-      // Populate form state
+      // Populate form state safely
       setFormData({
         fullName: profileRow?.full_name || '',
         email: user.email || '',
         specialization: doctorRow?.specialization || '',
         licenseNo: doctorRow?.license_no || '',
-        phone: doctorRow?.phone || '',
-        bio: doctorRow?.bio || '',
-        yearsExperience: doctorRow?.years_experience || '',
       })
 
       return combined
@@ -106,16 +99,12 @@ export default function DoctorProfile() {
         if (profileError) throw profileError
       }
 
-      // Update doctors table
+      // Update doctors table - STRICTLY matching DB columns
       const { error: doctorError } = await supabase
         .from('doctors')
         .update({
           specialization: formData.specialization,
           license_no: formData.licenseNo,
-          phone: formData.phone,
-          bio: formData.bio,
-          years_experience: parseInt(formData.yearsExperience) || 0,
-          updated_at: new Date().toISOString(),
         })
         .eq('id', user.id)
 
@@ -124,7 +113,7 @@ export default function DoctorProfile() {
       setSuccessMessage('Profile updated successfully!')
       setIsEditing(false)
       
-      // Refresh data
+      // Refresh data to show changes
       await refetch()
     } catch (err) {
       setSaveError(err.message || 'Failed to save profile')
@@ -292,80 +281,10 @@ export default function DoctorProfile() {
                   }}
                 />
               </div>
-
-              {/* Phone */}
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="Enter phone number"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              {/* Years of Experience */}
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>
-                  Years of Experience
-                </label>
-                <input
-                  type="number"
-                  name="yearsExperience"
-                  value={formData.yearsExperience}
-                  onChange={handleInputChange}
-                  placeholder="0"
-                  min="0"
-                  max="70"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.875rem',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>
-                Bio / About
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleInputChange}
-                placeholder="Write a brief bio about yourself"
-                rows={4}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '0.375rem',
-                  fontSize: '0.875rem',
-                  boxSizing: 'border-box',
-                  fontFamily: 'inherit',
-                  resize: 'vertical',
-                }}
-              />
             </div>
 
             {/* Form Actions */}
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -427,7 +346,7 @@ export default function DoctorProfile() {
                   </p>
                 </div>
 
-                <div style={{ marginBottom: '1.5rem' }}>
+                <div>
                   <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
                     License Number
                   </h3>
@@ -435,28 +354,10 @@ export default function DoctorProfile() {
                     {formData.licenseNo || '—'}
                   </p>
                 </div>
-
-                <div>
-                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                    Years of Experience
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
-                    {formData.yearsExperience ? `${formData.yearsExperience} years` : '—'}
-                  </p>
-                </div>
               </div>
 
               {/* Right Column */}
               <div style={{ paddingLeft: '1.5rem' }}>
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                    Phone Number
-                  </h3>
-                  <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
-                    {formData.phone || '—'}
-                  </p>
-                </div>
-
                 <div>
                   <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
                     Account Status
@@ -475,18 +376,6 @@ export default function DoctorProfile() {
                 </div>
               </div>
             </div>
-
-            {/* Bio Section */}
-            {formData.bio && (
-              <div style={{ padding: '1.5rem', borderTop: '1px solid #e5e7eb', backgroundColor: '#fafafa' }}>
-                <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.75rem', textTransform: 'uppercase', color: '#9ca3af', fontWeight: 600 }}>
-                  About
-                </h3>
-                <p style={{ margin: 0, color: '#374151', lineHeight: 1.6, fontSize: '0.9rem' }}>
-                  {formData.bio}
-                </p>
-              </div>
-            )}
           </div>
         ) : null}
       </div>

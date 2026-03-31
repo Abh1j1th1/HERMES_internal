@@ -26,9 +26,7 @@ export default function DoctorPatients() {
           scheduled_at,
           patients (
             id,
-            date_of_birth,
-            blood_type,
-            allergies,
+            dob,
             profiles (
               id,
               full_name,
@@ -55,9 +53,7 @@ export default function DoctorPatients() {
               id: appt.patients.id,
               profile: appt.patients.profiles,
               patient: {
-                date_of_birth: appt.patients.date_of_birth,
-                blood_type: appt.patients.blood_type,
-                allergies: appt.patients.allergies,
+                dob: appt.patients.dob,
               },
               lastAppointment: appt.scheduled_at,
               appointmentStatus: appt.status,
@@ -156,7 +152,7 @@ export default function DoctorPatients() {
                 to={`/doctor/patients/${patient.id}`}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 1fr 1fr 1fr',
+                  gridTemplateColumns: '2fr 1fr 1fr',
                   gap: '1.5rem',
                   alignItems: 'center',
                   padding: '1.5rem',
@@ -188,49 +184,17 @@ export default function DoctorPatients() {
                   </p>
                 </div>
 
-                {/* Medical Info */}
+                {/* Age */}
                 <div>
-                  <div style={{ marginBottom: '0.75rem' }}>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>
-                      Blood Type
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
-                      {patient.patient?.blood_type || '—'}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>
-                      Age
-                    </h4>
-                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
-                      {patient.patient?.date_of_birth
-                        ? calculateAge(patient.patient.date_of_birth)
-                        : '—'}
-                      {patient.patient?.date_of_birth && ' years'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Allergies */}
-                <div>
-                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Allergies
+                  <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.75rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase' }}>
+                    Age
                   </h4>
-                  {patient.patient?.allergies ? (
-                    <p style={{
-                      margin: 0,
-                      fontSize: '0.875rem',
-                      color: '#dc2626',
-                      fontWeight: 500,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>
-                      ⚠ {patient.patient.allergies}
-                    </p>
-                  ) : (
-                    <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>No known allergies</p>
-                  )}
+                  <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 500, color: '#111827' }}>
+                    {patient.patient?.dob
+                      ? calculateAge(patient.patient.dob)
+                      : '—'}
+                    {patient.patient?.dob && ' years'}
+                  </p>
                 </div>
 
                 {/* Last Appointment */}
