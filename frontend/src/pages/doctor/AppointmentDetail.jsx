@@ -6,25 +6,36 @@ import ErrorMessage from '../../components/ui/ErrorMessage'
 import { useFetch } from '../../hooks/useFetch'
 import { supabase } from '../../lib/supabase'
 
+const VITAL_FIELDS = [
+  { key: 'blood_pressure', label: 'Blood Pressure', placeholder: 'e.g. 120/80 mmHg' },
+  { key: 'heart_rate', label: 'Heart Rate', placeholder: 'e.g. 72 bpm' },
+  { key: 'temperature', label: 'Temperature', placeholder: 'e.g. 98.6 °F' },
+  { key: 'oxygen_saturation', label: 'Oxygen Saturation', placeholder: 'e.g. 98%' },
+  { key: 'weight', label: 'Weight', placeholder: 'e.g. 70 kg' },
+  { key: 'height', label: 'Height', placeholder: 'e.g. 175 cm' },
+  { key: 'respiratory_rate', label: 'Respiratory Rate', placeholder: 'e.g. 16 breaths/min' },
+]
+
 export default function DoctorAppointmentDetail() {
   const { id } = useParams()
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [creatingRecord, setCreatingRecord] = useState(false)
-  const [recordForm, setRecordForm] = useState({ description: '', prescription: '', vitals: '' })
+  const [recordForm, setRecordForm] = useState({
+    description: '',
+    prescription: '',
+    vitals: Object.fromEntries(VITAL_FIELDS.map(f => [f.key, '']))
+  })
   const [medicalRecord, setMedicalRecord] = useState(null)
+  const [statusError, setStatusError] = useState(null)
+  const [recordError, setRecordError] = useState(null)
 
   const { data: appt, loading, error, refetch } = useFetch(async () => {
-    // Fetch appointment
     const { data: appointmentData, error: apptError } = await supabase
       .from('appointments')
       .select(`
         *,
         patients (
-          profiles (
-            full_name,
-            email,
-            role
-          ),
+          profiles (full_name, email, role),
           dob
         )
       `)
@@ -33,16 +44,13 @@ export default function DoctorAppointmentDetail() {
 
     if (apptError) throw apptError
 
-    // Fetch medical record
     const { data: recordData, error: recordError } = await supabase
       .from('medical_records')
       .select('*')
       .eq('appointment_id', id)
       .maybeSingle()
 
-    if (recordError && recordError.code !== 'PGRST116') {
-      throw recordError
-    }
+    if (recordError && recordError.code !== 'PGRST116') throw recordError
 
     setMedicalRecord(recordData || null)
     return appointmentData
@@ -51,15 +59,16 @@ export default function DoctorAppointmentDetail() {
   async function handleStatusChange(newStatus) {
     if (!confirm(`Are you sure you want to change status to ${newStatus}?`)) return
     setUpdatingStatus(true)
+    setStatusError(null)
     try {
       const { error } = await supabase.rpc('update_appointment_status', {
-        p_appointment_id: id,
-        p_status: newStatus
+        appointment_id: id,
+        new_status: newStatus
       })
       if (error) throw error
       refetch()
     } catch (err) {
-      alert(`Failed to update status: ${err.message}`)
+      setStatusError(err.message)
     } finally {
       setUpdatingStatus(false)
     }
@@ -68,15 +77,11 @@ export default function DoctorAppointmentDetail() {
   async function handleCreateRecord(e) {
     e.preventDefault()
     setCreatingRecord(true)
+    setRecordError(null)
     try {
-      let vitalsObj = null
-      if (recordForm.vitals) {
-        try {
-          vitalsObj = JSON.parse(recordForm.vitals)
-        } catch (err) {
-          throw new Error('Vitals must be valid JSON format')
-        }
-      }
+      const vitalsObj = Object.fromEntries(
+        Object.entries(recordForm.vitals).filter(([_, v]) => v.trim() !== '')
+      )
 
       const { data: newRecord, error } = await supabase
         .from('medical_records')
@@ -84,7 +89,7 @@ export default function DoctorAppointmentDetail() {
           appointment_id: id,
           description: recordForm.description,
           prescription: recordForm.prescription || null,
-          vitals: vitalsObj
+          vitals: Object.keys(vitalsObj).length > 0 ? vitalsObj : null
         })
         .select()
         .single()
@@ -92,7 +97,7 @@ export default function DoctorAppointmentDetail() {
       if (error) throw error
       setMedicalRecord(newRecord)
     } catch (err) {
-      alert(`Failed to create medical record: ${err.message}`)
+      setRecordError(err.message)
     } finally {
       setCreatingRecord(false)
     }
@@ -100,7 +105,9 @@ export default function DoctorAppointmentDetail() {
 
   return (
     <PageLayout>
-      <Link to="/doctor/appointments" style={{ textDecoration: 'none', color: '#0066cc' }}>&larr; Back to Appointments</Link>
+      <Link to="/doctor/appointments" style={{ textDecoration: 'none', color: '#0066cc' }}>
+        ← Back to Appointments
+      </Link>
       <h1 style={{ marginTop: '1rem' }}>Appointment Detail</h1>
 
       {loading ? (
@@ -111,15 +118,20 @@ export default function DoctorAppointmentDetail() {
         <p>Appointment not found.</p>
       ) : (
         <div style={{ display: 'grid', gap: '2rem', marginTop: '1rem' }}>
-          <div style={{ padding: '1.5rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+
+          <div style={{ padding: '1.5rem', border: '1px solid #ddd', borderRadius: 8 }}>
             <h3>Patient Information</h3>
-            <p><strong>Name:</strong> {appt.patients?.profiles?.full_name}</p>
-            <p><strong>Email:</strong> {appt.patients?.profiles?.email}</p>
+            <p><strong>Name:</strong> {Array.isArray(appt.patients?.profiles) ? appt.patients?.profiles[0]?.full_name : appt.patients?.profiles?.full_name}</p>
+            <p><strong>Email:</strong> {Array.isArray(appt.patients?.profiles) ? appt.patients?.profiles[0]?.email : appt.patients?.profiles?.email}</p>
             <p><strong>DOB:</strong> {appt.patients?.dob}</p>
 
             <h3 style={{ marginTop: '1.5rem' }}>Appointment Details</h3>
             <p><strong>Date & Time:</strong> {new Date(appt.scheduled_at).toLocaleString()}</p>
             <p><strong>Current Status:</strong> {appt.status}</p>
+
+            {statusError && (
+              <p style={{ color: 'red', marginTop: '0.5rem', fontSize: 14 }}>⚠ {statusError}</p>
+            )}
 
             <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
               <button
@@ -146,20 +158,26 @@ export default function DoctorAppointmentDetail() {
             </div>
           </div>
 
-          <div style={{ padding: '1.5rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+          <div style={{ padding: '1.5rem', border: '1px solid #ddd', borderRadius: 8 }}>
             <h3>Medical Record</h3>
             {medicalRecord ? (
               <div style={{ marginTop: '1rem' }}>
                 <p>Record exists for this appointment.</p>
-                <Link to={`/doctor/records/${medicalRecord.id}`} style={{ display: 'inline-block', marginTop: '0.5rem', textDecoration: 'none', color: '#0066cc', fontWeight: 'bold' }}>
-                  View / Edit Medical Record &rarr;
+                <Link
+                  to={`/doctor/records/${medicalRecord.id}`}
+                  style={{ display: 'inline-block', marginTop: '0.5rem', textDecoration: 'none', color: '#0066cc', fontWeight: 'bold' }}
+                >
+                  View / Edit Medical Record →
                 </Link>
               </div>
             ) : (
               <form onSubmit={handleCreateRecord} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-                <p>No medical record exists yet. Create one below:</p>
+                <p style={{ color: 'gray', fontSize: 14 }}>No medical record exists yet. Create one below:</p>
+
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>Description / Notes</label>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
+                    Description / Notes
+                  </label>
                   <textarea
                     style={{ width: '100%', padding: '0.5rem' }}
                     rows={4}
@@ -168,8 +186,11 @@ export default function DoctorAppointmentDetail() {
                     onChange={e => setRecordForm({ ...recordForm, description: e.target.value })}
                   />
                 </div>
+
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>Prescription</label>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
+                    Prescription
+                  </label>
                   <textarea
                     style={{ width: '100%', padding: '0.5rem' }}
                     rows={2}
@@ -177,17 +198,45 @@ export default function DoctorAppointmentDetail() {
                     onChange={e => setRecordForm({ ...recordForm, prescription: e.target.value })}
                   />
                 </div>
+
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>Vitals (JSON format e.g. {"{\"bp\":\"120/80\"}"})</label>
-                  <input
-                    type="text"
-                    style={{ width: '100%', padding: '0.5rem' }}
-                    value={recordForm.vitals}
-                    placeholder='{"bp":"120/80"}'
-                    onChange={e => setRecordForm({ ...recordForm, vitals: e.target.value })}
-                  />
+                  <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 'bold' }}>
+                    Vitals <span style={{ fontWeight: 400, color: 'gray', fontSize: 13 }}>(optional — leave blank to skip)</span>
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    {VITAL_FIELDS.map(field => (
+                      <div key={field.key}>
+                        <label style={{ display: 'block', fontSize: 13, color: 'gray', marginBottom: 4 }}>
+                          {field.label}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={field.placeholder}
+                          value={recordForm.vitals[field.key]}
+                          onChange={e => setRecordForm({
+                            ...recordForm,
+                            vitals: { ...recordForm.vitals, [field.key]: e.target.value }
+                          })}
+                          style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #d1d5db', fontSize: 14 }}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <button type="submit" disabled={creatingRecord} style={{ alignSelf: 'flex-start', padding: '0.5rem 1.5rem', cursor: 'pointer', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px' }}>
+
+                {recordError && (
+                  <p style={{ color: 'red', fontSize: 14 }}>⚠ {recordError}</p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={creatingRecord}
+                  style={{
+                    alignSelf: 'flex-start', padding: '0.5rem 1.5rem',
+                    cursor: 'pointer', background: '#0066cc', color: 'white',
+                    border: 'none', borderRadius: 4
+                  }}
+                >
                   {creatingRecord ? 'Creating...' : 'Create Record'}
                 </button>
               </form>

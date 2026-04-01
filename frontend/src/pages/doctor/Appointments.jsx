@@ -42,8 +42,8 @@ export default function DoctorAppointments() {
         <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
           {data.map(appt => (
             <div key={appt.id} style={{ border: '1px solid #ddd', padding: '1.5rem', borderRadius: '8px' }}>
-              <h3>Patient: {appt.patients?.profiles?.full_name || 'Unknown Patient'}</h3>
-              <p><strong>Email:</strong> {appt.patients?.profiles?.email || 'N/A'}</p>
+              <h3>Patient: {Array.isArray(appt.patients?.profiles) ? appt.patients?.profiles[0]?.full_name : appt.patients?.profiles?.full_name || 'Unknown Patient'}</h3>
+              <p><strong>Email:</strong> {Array.isArray(appt.patients?.profiles) ? appt.patients?.profiles[0]?.email : appt.patients?.profiles?.email || 'N/A'}</p>
               <p><strong>Date:</strong> {new Date(appt.scheduled_at).toLocaleString()}</p>
               <p><strong>Status:</strong> {appt.status}</p>
               <div style={{ marginTop: '1rem' }}>
