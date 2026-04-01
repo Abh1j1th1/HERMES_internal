@@ -8,6 +8,7 @@ import ForgotPassword from '../pages/ForgotPassword'
 import ResetPassword from '../pages/ResetPassword'
 import Unauthorized from '../pages/Unauthorized'
 
+import PatientCompleteProfile from '../pages/patient/CompleteProfile'
 import PatientDashboard from '../pages/patient/Dashboard'
 import BookAppointment from '../pages/patient/BookAppointment'
 import PatientAppointments from '../pages/patient/Appointments'
@@ -16,6 +17,7 @@ import PatientRecords from '../pages/patient/Records'
 import PatientRecordDetail from '../pages/patient/RecordDetail'
 import PatientDoctors from '../pages/patient/Doctors'
 import PatientProfile from '../pages/patient/Profile'
+
 
 import DoctorCompleteProfile from '../pages/doctor/CompleteProfile'
 import DoctorDashboard from '../pages/doctor/Dashboard'
@@ -27,6 +29,7 @@ import DoctorPatientDetail from '../pages/doctor/PatientDetail'
 import DoctorAvailability from '../pages/doctor/Availability'
 import DoctorProfile from '../pages/doctor/Profile'
 
+
 export const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/login', element: <Login /> },
@@ -34,6 +37,8 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
   { path: '/unauthorized', element: <Unauthorized /> },
+
+  { path: '/patient/complete-profile', element: <PatientCompleteProfile /> },
 
   {
     path: '/patient',

@@ -48,7 +48,9 @@ export default function PatientProfile() {
   const [form, setForm] = useState({
     full_name: '',
     phone_number: '',
-    dob: ''
+    gender: 'male',
+    dob: '',
+    address: ''
   })
   const [saveError, setSaveError] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
@@ -60,12 +62,12 @@ export default function PatientProfile() {
     const [profileResponse, patientResponse] = await Promise.all([
       supabase
         .from('profiles')
-        .select('id, full_name, email, role, phone_number')
+        .select('id, full_name, email, role, phone_number, gender')
         .eq('id', user.id)
         .single(),
       supabase
         .from('patients')
-        .select('dob')
+        .select('dob, address')
         .eq('id', user.id)
         .maybeSingle()
     ])
@@ -81,21 +83,18 @@ export default function PatientProfile() {
 
   useEffect(() => {
     if (!data?.profile) return
-
     setForm({
       full_name: data.profile.full_name ?? '',
       phone_number: data.profile.phone_number ?? '',
-      dob: data.patient?.dob ?? ''
+      gender: data.profile.gender ?? 'male',
+      dob: data.patient?.dob ?? '',
+      address: data.patient?.address ?? ''
     })
   }, [data])
 
   function handleChange(event) {
     const { name, value } = event.target
-
-    setForm(current => ({
-      ...current,
-      [name]: value
-    }))
+    setForm(current => ({ ...current, [name]: value }))
   }
 
   async function handleSubmit(event) {
@@ -108,17 +107,14 @@ export default function PatientProfile() {
 
     try {
       const trimmedName = form.full_name.trim()
-      const normalizedPhone = form.phone_number.trim()
-
-      if (!trimmedName) {
-        throw new Error('Full name is required.')
-      }
+      if (!trimmedName) throw new Error('Full name is required.')
 
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           full_name: trimmedName,
-          phone_number: normalizedPhone || null
+          phone_number: form.phone_number.trim() || null,
+          gender: form.gender
         })
         .eq('id', user.id)
 
@@ -127,7 +123,10 @@ export default function PatientProfile() {
       if (data.patient) {
         const { error: patientError } = await supabase
           .from('patients')
-          .update({ dob: form.dob || data.patient.dob })
+          .update({
+            dob: form.dob || data.patient.dob,
+            address: form.address.trim() || null
+          })
           .eq('id', user.id)
 
         if (patientError) throw patientError
@@ -136,7 +135,7 @@ export default function PatientProfile() {
       setSaveMessage(
         data.patient
           ? 'Profile updated successfully.'
-          : 'Basic profile updated. Date of birth is unavailable because no patient record exists yet.'
+          : 'Basic profile updated. Date of birth and address are unavailable because no patient record exists yet.'
       )
       await refetch()
     } catch (e) {
@@ -151,9 +150,7 @@ export default function PatientProfile() {
       <div style={{ display: 'grid', gap: '1.5rem' }}>
         <div style={{ textAlign: 'left' }}>
           <h1 style={{ marginBottom: '0.75rem' }}>Patient Profile</h1>
-          <p>
-            Review your account details and keep your personal information current.
-          </p>
+          <p>Review your account details and keep your personal information current.</p>
         </div>
 
         {loading && <LoadingSpinner message="Loading your profile..." />}
@@ -180,6 +177,12 @@ export default function PatientProfile() {
                 </p>
               </div>
               <div>
+                <p style={{ fontSize: 13, marginBottom: 6 }}>Gender</p>
+                <p style={{ color: 'var(--text-h)', fontSize: 18, textTransform: 'capitalize' }}>
+                  {data.profile.gender ?? 'Not provided'}
+                </p>
+              </div>
+              <div>
                 <p style={{ fontSize: 13, marginBottom: 6 }}>Date of birth</p>
                 <p style={{ color: 'var(--text-h)', fontSize: 18 }}>
                   {formatDate(data.patient?.dob)}
@@ -188,22 +191,20 @@ export default function PatientProfile() {
             </section>
 
             <section style={cardStyle}>
-              <div
-                style={{
-                  marginBottom: '1.25rem',
-                  textAlign: 'left',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: '1rem',
-                  flexWrap: 'wrap'
-                }}
-              >
+              <div style={{
+                marginBottom: '1.25rem',
+                textAlign: 'left',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: '1rem',
+                flexWrap: 'wrap'
+              }}>
                 <div>
                   <h2 style={{ marginBottom: '0.4rem' }}>Edit details</h2>
                   <p style={{ fontSize: 14 }}>
                     Email and role are managed separately. You can update your name,
-                    phone number, and birth date here.
+                    phone number, gender, date of birth, and address here.
                   </p>
                 </div>
               </div>
@@ -244,6 +245,33 @@ export default function PatientProfile() {
                   />
                 </label>
 
+                <div style={labelStyle}>
+                  Gender
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    {['male', 'female', 'other'].map(g => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, gender: g }))}
+                        style={{
+                          flex: 1,
+                          padding: '0.7rem',
+                          border: form.gender === g ? '2px solid #0e7fa8' : '2px solid #9ca3af',
+                          borderRadius: 10,
+                          background: form.gender === g ? '#e0f4fa' : 'var(--bg)',
+                          color: form.gender === g ? '#0e7fa8' : 'var(--text-h)',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          textTransform: 'capitalize'
+                        }}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <label style={labelStyle}>
                   Date of birth
                   <input
@@ -256,10 +284,22 @@ export default function PatientProfile() {
                   />
                 </label>
 
+                <label style={labelStyle}>
+                  Address
+                  <textarea
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    style={{ ...inputStyle, resize: 'vertical', minHeight: 80 }}
+                    placeholder="Your home address (optional)"
+                    disabled={!data.patient}
+                  />
+                </label>
+
                 {!data.patient && (
                   <p style={{ fontSize: 14, color: '#b45309', textAlign: 'left' }}>
-                    Your patient record is missing, so date of birth cannot be edited from
-                    this screen yet.
+                    Your patient record is missing, so date of birth and address cannot
+                    be edited from this screen yet.
                   </p>
                 )}
 
@@ -279,13 +319,7 @@ export default function PatientProfile() {
                 )}
               </form>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  marginTop: '1rem'
-                }}
-              >
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
                 <button
                   type="submit"
                   form="patient-profile-form"
