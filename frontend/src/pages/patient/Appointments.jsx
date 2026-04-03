@@ -67,9 +67,6 @@ export default function PatientAppointments() {
                 <Card key={appointment.id} className="space-y-4">
                   <div className="grid gap-4 lg:grid-cols-[1.2fr_0.9fr_auto] lg:items-center">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Doctor
-                      </p>
                       <h3 className="mt-2 text-lg font-semibold text-slate-900">
                         {doctorProfile?.full_name ? `Dr. ${doctorProfile.full_name}` : 'Unknown doctor'}
                       </h3>
