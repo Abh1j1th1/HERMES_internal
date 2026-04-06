@@ -4,10 +4,14 @@ DROP POLICY IF EXISTS "Patients can cancel own appointments" ON public.appointme
 CREATE POLICY "Patients can cancel own appointments"
 ON public.appointments FOR UPDATE
 TO authenticated
-USING (auth.uid() = patient_id)
+USING (
+  auth.uid() = patient_id
+  AND status = 'scheduled'
+)
 WITH CHECK (
   auth.uid() = patient_id
   AND status = 'cancelled'
+);
 );
 
 REVOKE UPDATE ON public.appointments FROM authenticated;
