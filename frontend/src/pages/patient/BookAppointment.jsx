@@ -18,20 +18,13 @@ import { dateFromKey, dateTimeFromKeyAndTime, toDateKey, todayDateKey } from '..
 import { formatDate, formatTime } from '../../lib/formatters'
 import { supabase } from '../../lib/supabase'
 
-function CalendarPicker({ availability, existingAppointments, selectedDate, onSelect }) {
+function CalendarPicker({ availability, selectedDate, onSelect }) {
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
   const availableDays = new Set((availability || []).map(slot => slot.day))
   const firstDay = new Date(viewYear, viewMonth, 1).getDay()
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-
-  const bookedDates = new Set(
-    (existingAppointments || []).map(appointment => {
-      const date = new Date(appointment.scheduled_at)
-      return toDateKey(date)
-    })
-  )
 
   function previousMonth() {
     if (viewMonth === 0) {
@@ -94,10 +87,9 @@ function CalendarPicker({ availability, existingAppointments, selectedDate, onSe
           const dayName = DAYS_JS[jsDay]
           const isAvailable = availableDays.has(dayName)
           const isPast = dateStr < todayDateKey()
-          const isBooked = bookedDates.has(dateStr)
           const isSelected = selectedDate === dateStr
           const isToday = dateStr === toDateKey(today)
-          const isSelectable = isAvailable && !isPast && !isBooked
+          const isSelectable = isAvailable && !isPast
 
           return (
             <button
@@ -360,7 +352,6 @@ export default function PatientBookAppointment() {
                 <div className="space-y-5">
                   <CalendarPicker
                     availability={availability}
-                    existingAppointments={existingAppointments}
                     selectedDate={selectedDate}
                     onSelect={date => {
                       setSelectedDate(date)
