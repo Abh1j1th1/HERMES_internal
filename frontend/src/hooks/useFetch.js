@@ -76,14 +76,19 @@ export function useFetch(fn, deps = [], options = {}) {
       setData(cachedEntry.data ?? null)
       setError(cachedEntry.error ?? null)
       setLoading(!isFresh(cachedEntry, ttl))
-    } else {
-      setLoading(true)
-      setError(null)
-    }
+  if (usingStaleEntry) {
+    setData(cachedEntry.data ?? null)
+    setError(cachedEntry.error ?? null)
+    setLoading(!isFresh(cachedEntry, ttl))
+  } else {
+    setLoading(true)
+    setError(null)
+  }
 
-    if (!force && cachedEntry && isFresh(cachedEntry, ttl)) {
-      return cachedEntry.data ?? null
-    }
+  if (!force && cachedEntry && isFresh(cachedEntry, ttl)) {
+    setLoading(false)
+    return cachedEntry.data ?? null
+  }
 
     setLoading(true)
     if (!usingStaleEntry) {
