@@ -1,14 +1,37 @@
 import { useEffect, useRef, useState } from 'react'
 
 const fetchCache = new Map()
+const MAX_CACHE_ENTRIES = 200
+
+function purgeStaleEntries(maxAge) {
+  if (!maxAge) return
+
+  const now = Date.now()
+
+  for (const [key, entry] of fetchCache.entries()) {
+    if (now - entry.timestamp > maxAge) {
+      fetchCache.delete(key)
+    }
+  }
+}
 
 function getCachedEntry(key) {
   if (!key) return null
   return fetchCache.get(key) ?? null
 }
 
-function setCachedEntry(key, value) {
+function setCachedEntry(key, value, maxAge) {
   if (!key) return
+  purgeStaleEntries(maxAge)
+
+  if (fetchCache.has(key)) {
+    fetchCache.delete(key)
+  }
+
+  while (fetchCache.size >= MAX_CACHE_ENTRIES) {
+    fetchCache.delete(fetchCache.keys().next().value)
+  }
+
   fetchCache.set(key, value)
 }
 
@@ -78,7 +101,7 @@ export function useFetch(fn, deps = [], options = {}) {
         data: result,
         error: null,
         timestamp: Date.now(),
-      })
+      }, ttl)
 
       return result
     } catch (error) {
@@ -90,7 +113,7 @@ export function useFetch(fn, deps = [], options = {}) {
         data: cachedEntry?.data ?? null,
         error: error.message,
         timestamp: Date.now(),
-      })
+      }, ttl)
       return cachedEntry?.data ?? null
     } finally {
       if (requestIdRef.current === requestId) {
