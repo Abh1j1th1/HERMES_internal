@@ -10,7 +10,7 @@ import { useFetch } from '../../hooks/useFetch'
 import AdminDataTable, { AdminLinkCell, AdminStatusCell } from './components/AdminDataTable'
 import AdminFilterBar from './components/AdminFilterBar'
 import AdminSection from './components/AdminSection'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminAppointmentsSkeleton, AdminErrorState } from './components/AdminPageState'
 import { createAdminAppointment, loadAdminAppointments, loadAdminUsers } from './lib/loaders'
 import { filterAppointments } from './lib/normalizers'
 import { validateAppointmentForm } from './lib/validators'
@@ -25,7 +25,7 @@ export default function AdminAppointments() {
   const [message, setMessage] = React.useState(null)
 
   if (appointmentsFetch.loading || usersFetch.loading) {
-    return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+    return <PageLayout width="wide"><AdminAppointmentsSkeleton /></PageLayout>
   }
 
   if (appointmentsFetch.error || usersFetch.error) {
@@ -73,7 +73,7 @@ export default function AdminAppointments() {
   return (
     <PageLayout width="wide">
       <div className="space-y-6">
-        <AdminSection title="Create appointment" description="Uses admin booking RPC.">
+        <AdminSection title="Create appointment">
           <form className="grid gap-4 lg:grid-cols-4" onSubmit={handleCreate}>
             <Field label="Patient" error={errors.patientId}>
               <Select value={draft.patientId} onChange={event => setDraft(current => ({ ...current, patientId: event.target.value }))}>
@@ -125,12 +125,12 @@ export default function AdminAppointments() {
 
         <AdminDataTable
           columns={[
+            { key: 'patientName', label: 'Patient' },
             {
               key: 'scheduledLabel',
               label: 'When',
-              render: row => <AdminLinkCell to={`/admin/appointments/${row.id}`} primary={row.scheduledLabel} secondary={row.id.slice(0, 8)} />,
+              render: row => <AdminLinkCell to={`/admin/appointments/${row.id}`} primary={row.scheduledLabel} />,
             },
-            { key: 'patientName', label: 'Patient' },
             { key: 'doctorName', label: 'Doctor' },
             {
               key: 'status',
@@ -151,6 +151,7 @@ export default function AdminAppointments() {
           emptyTitle="No appointments"
           emptyDescription="Adjust filters or create appointment."
         />
+  
       </div>
     </PageLayout>
   )

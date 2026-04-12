@@ -1,11 +1,7 @@
-import { CalendarDays, ClipboardList, ShieldAlert, Stethoscope, UserRound, Users } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import PageLayout from '../../components/layout/PageLayout'
-import Button from '../../components/ui/Button'
-import MetricCard from '../../components/ui/MetricCard'
 import { useFetch } from '../../hooks/useFetch'
 import AdminQueueList from './components/AdminQueueList'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminDashboardSkeleton, AdminErrorState } from './components/AdminPageState'
 import { loadAdminDashboard } from './lib/loaders'
 
 export default function AdminDashboard() {
@@ -14,7 +10,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <PageLayout width="wide">
-        <AdminLoadingState />
+        <AdminDashboardSkeleton />
       </PageLayout>
     )
   }
@@ -27,22 +23,20 @@ export default function AdminDashboard() {
     )
   }
 
-  const metrics = data.metrics
-
   return (
     <PageLayout
       width="wide"
-      actions={(
-        <>
-          <Button as={Link} to="/admin/users" variant="secondary" size="small">Users</Button>
-          <Button as={Link} to="/admin/appointments" variant="secondary" size="small">Appointments</Button>
-          <Button as={Link} to="/admin/records" variant="secondary" size="small">Records</Button>
-          <Button as={Link} to="/admin/availability" size="small">Availability</Button>
-        </>
-      )}
+      // actions={(
+      //   <>
+      //     <Button as={Link} to="/admin/users" variant="secondary" size="small">Users</Button>
+      //     <Button as={Link} to="/admin/appointments" variant="secondary" size="small">Appointments</Button>
+      //     <Button as={Link} to="/admin/records" variant="secondary" size="small">Records</Button>
+      //     <Button as={Link} to="/admin/availability" size="small">Availability</Button>
+      //   </>
+      // )}
     >
       <div className="space-y-6">
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {/* <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <MetricCard label="Patients" value={metrics.patientCount} icon={<Users className="h-5 w-5" />} />
           <MetricCard label="Doctors" value={metrics.doctorCount} icon={<Stethoscope className="h-5 w-5" />} />
           <MetricCard label="Admins" value={metrics.adminCount} icon={<UserRound className="h-5 w-5" />} />
@@ -53,7 +47,7 @@ export default function AdminDashboard() {
           <MetricCard label="Missing records" value={metrics.missingRecords} tone="warning" />
           <MetricCard label="No availability" value={metrics.doctorsWithoutAvailability} tone="warning" />
           <MetricCard label="Broken links" value={metrics.brokenLinks} tone="critical" icon={<ShieldAlert className="h-5 w-5" />} />
-        </section>
+        </section> */}
 
         <section className="grid gap-6 xl:grid-cols-3">
           <AdminQueueList

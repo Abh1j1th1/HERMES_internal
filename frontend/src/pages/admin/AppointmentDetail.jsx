@@ -8,7 +8,7 @@ import Select from '../../components/ui/Select'
 import TextInput from '../../components/ui/TextInput'
 import { useFetch } from '../../hooks/useFetch'
 import AdminSection from './components/AdminSection'
-import { AdminEmptyState, AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminAppointmentDetailSkeleton, AdminEmptyState, AdminErrorState } from './components/AdminPageState'
 import { loadAdminAppointmentDetail, updateAdminAppointment } from './lib/loaders'
 import { validateAppointmentForm } from './lib/validators'
 
@@ -57,7 +57,7 @@ export default function AdminAppointmentDetail() {
     }
   }
 
-  if (loading) return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+  if (loading) return <PageLayout width="wide"><AdminAppointmentDetailSkeleton /></PageLayout>
   if (error) return <PageLayout width="wide"><AdminErrorState error={error} onRetry={refetch} /></PageLayout>
   if (!data) return <PageLayout width="wide"><AdminEmptyState title="Appointment missing" description="Requested appointment not found." icon="?" /></PageLayout>
 

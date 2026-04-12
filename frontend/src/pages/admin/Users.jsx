@@ -7,7 +7,7 @@ import TextInput from '../../components/ui/TextInput'
 import { useFetch } from '../../hooks/useFetch'
 import AdminDataTable, { AdminLinkCell, AdminStatusCell } from './components/AdminDataTable'
 import AdminFilterBar from './components/AdminFilterBar'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminErrorState, AdminUsersSkeleton } from './components/AdminPageState'
 import { loadAdminUsers } from './lib/loaders'
 import { filterUsers } from './lib/normalizers'
 import Button from '../../components/ui/Button'
@@ -18,7 +18,7 @@ export default function AdminUsers() {
   const [role, setRole] = React.useState('all')
 
   if (loading) {
-    return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+    return <PageLayout width="wide"><AdminUsersSkeleton /></PageLayout>
   }
 
   if (error) {

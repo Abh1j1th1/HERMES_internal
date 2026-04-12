@@ -11,7 +11,7 @@ import { useFetch } from '../../hooks/useFetch'
 import AdminDataTable, { AdminLinkCell } from './components/AdminDataTable'
 import AdminQueueList from './components/AdminQueueList'
 import AdminSection from './components/AdminSection'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminErrorState, AdminRecordsSkeleton } from './components/AdminPageState'
 import { loadAdminAppointments, loadAdminRecords, saveAdminMedicalRecord } from './lib/loaders'
 import { buildRecordQueue } from './lib/normalizers'
 import { validateMedicalRecordForm } from './lib/validators'
@@ -25,7 +25,7 @@ export default function AdminRecords() {
   const [message, setMessage] = React.useState(null)
 
   if (recordsFetch.loading || appointmentsFetch.loading) {
-    return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+    return <PageLayout width="wide"><AdminRecordsSkeleton /></PageLayout>
   }
 
   if (recordsFetch.error || appointmentsFetch.error) {

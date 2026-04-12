@@ -8,7 +8,7 @@ import TextInput from '../../components/ui/TextInput'
 import { useAuth } from '../../hooks/useAuth.jsx'
 import { useFetch } from '../../hooks/useFetch'
 import AdminSection from './components/AdminSection'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminErrorState, AdminProfileSkeleton } from './components/AdminPageState'
 import { loadOwnAdminProfile, saveAdminUser } from './lib/loaders'
 
 export default function AdminProfile() {
@@ -52,7 +52,7 @@ export default function AdminProfile() {
     }
   }
 
-  if (loading) return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+  if (loading) return <PageLayout width="wide"><AdminProfileSkeleton /></PageLayout>
   if (error) return <PageLayout width="wide"><AdminErrorState error={error} onRetry={refetch} /></PageLayout>
 
   return (

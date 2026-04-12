@@ -8,7 +8,7 @@ import Textarea from '../../components/ui/Textarea'
 import TextInput from '../../components/ui/TextInput'
 import { useFetch } from '../../hooks/useFetch'
 import AdminSection from './components/AdminSection'
-import { AdminEmptyState, AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminEmptyState, AdminErrorState, AdminRecordDetailSkeleton } from './components/AdminPageState'
 import { loadAdminRecordDetail, saveAdminMedicalRecord } from './lib/loaders'
 import { validateMedicalRecordForm } from './lib/validators'
 
@@ -56,7 +56,7 @@ export default function AdminRecordDetail() {
     }
   }
 
-  if (loading) return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+  if (loading) return <PageLayout width="wide"><AdminRecordDetailSkeleton /></PageLayout>
   if (error) return <PageLayout width="wide"><AdminErrorState error={error} onRetry={refetch} /></PageLayout>
   if (!data) return <PageLayout width="wide"><AdminEmptyState title="Record missing" description="Requested record not found." icon="?" /></PageLayout>
 

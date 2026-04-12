@@ -8,7 +8,7 @@ import Select from '../../components/ui/Select'
 import TextInput from '../../components/ui/TextInput'
 import { useFetch } from '../../hooks/useFetch'
 import AdminSection from './components/AdminSection'
-import { AdminEmptyState, AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminEmptyState, AdminErrorState, AdminUserDetailSkeleton } from './components/AdminPageState'
 import { loadAdminUserDetail, saveAdminUser } from './lib/loaders'
 
 function buildDraft(user) {
@@ -65,7 +65,7 @@ export default function AdminUserDetail() {
   }
 
   if (loading) {
-    return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+    return <PageLayout width="wide"><AdminUserDetailSkeleton /></PageLayout>
   }
 
   if (error) {

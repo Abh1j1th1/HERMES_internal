@@ -7,7 +7,7 @@ import Select from '../../components/ui/Select'
 import TextInput from '../../components/ui/TextInput'
 import { useFetch } from '../../hooks/useFetch'
 import AdminSection from './components/AdminSection'
-import { AdminErrorState, AdminLoadingState } from './components/AdminPageState'
+import { AdminAvailabilitySkeleton, AdminErrorState } from './components/AdminPageState'
 import { createAvailabilitySlot, deleteAvailabilitySlot, loadAdminAvailability, updateAvailabilitySlot } from './lib/loaders'
 import { ADMIN_DAY_ORDER } from './lib/normalizers'
 import { validateAvailabilitySlot } from './lib/validators'
@@ -28,7 +28,7 @@ export default function AdminAvailability() {
     }
   }, [data, doctorId])
 
-  if (loading) return <PageLayout width="wide"><AdminLoadingState /></PageLayout>
+  if (loading) return <PageLayout width="wide"><AdminAvailabilitySkeleton /></PageLayout>
   if (error) return <PageLayout width="wide"><AdminErrorState error={error} onRetry={refetch} /></PageLayout>
 
   const selectedDoctor = data.find(row => row.id === doctorId) ?? null

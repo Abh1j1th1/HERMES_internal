@@ -30,7 +30,7 @@ const ICONS = {
 }
 
 function matchesPath(pathname, path) {
-  if (path === '/doctor' || path === '/patient') {
+  if (path === '/doctor' || path === '/patient' || path === '/admin') {
     return pathname === path
   }
 
