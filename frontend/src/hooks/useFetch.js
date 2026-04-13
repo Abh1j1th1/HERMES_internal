@@ -112,7 +112,7 @@ export function useFetch(fn, deps = [], options = {}) {
       setCachedEntry(key, {
         data: cachedEntry?.data ?? null,
         error: error.message,
-        timestamp: Date.now(),
+        timestamp: cachedEntry?.timestamp ?? 0,
       }, ttl)
       return cachedEntry?.data ?? null
     } finally {
