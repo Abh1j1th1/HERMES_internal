@@ -3,7 +3,7 @@
 Thumbs.db
 *.log
 
-
+skills-lock.json
 node_modules/
 dist/
 .env
