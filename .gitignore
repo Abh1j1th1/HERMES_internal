@@ -3,7 +3,7 @@
 Thumbs.db
 *.log
 
-
+skills-lock.json
 node_modules/
 dist/
 .env
@@ -18,3 +18,4 @@ backend/supabase/migrations/.trash/
 .vscode/
 .idea/
 *.swp
+.agents/
